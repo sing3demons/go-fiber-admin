@@ -23,14 +23,12 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
-
 	user := models.User{
 		FirstName: data["first_name"],
 		LastName:  data["last_name"],
 		Email:     data["email"],
-		Password:  string(password),
 	}
+	user.EncryptedPassword(data["password"])
 
 	if err := database.DB.Create(&user).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -73,7 +71,7 @@ func Login(c *fiber.Ctx) error {
 
 	c.Cookie(&cookie)
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "success"})
+	return c.SendStatus(fiber.StatusNoContent)
 }
 
 func User(c *fiber.Ctx) error {
@@ -95,5 +93,5 @@ func Logout(c *fiber.Ctx) error {
 	}
 
 	c.Cookie(&cookie)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "success"})
+	return c.SendStatus(fiber.StatusNoContent)
 }

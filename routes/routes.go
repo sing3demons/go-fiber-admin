@@ -15,8 +15,19 @@ func Serve(app *fiber.App) {
 		authGroup.Post("register", controllers.Register)
 		authGroup.Post("login", controllers.Login)
 		authGroup.Use(middlewares.IsAuthenticated)
-		authGroup.Get("user", controllers.User)
+		authGroup.Get("/user", controllers.User)
 		authGroup.Get("logout", controllers.Logout)
+	}
+	userGroup := v1.Group("users/")
+	userGroup.Use(middlewares.IsAuthenticated)
+	{
+
+		userGroup.Get("", controllers.AllUser)
+		userGroup.Get("/:id", controllers.GetUser)
+		userGroup.Post("", controllers.CreateUser)
+		userGroup.Post("/:id", controllers.UpdateUser)
+		userGroup.Delete("/:id", controllers.DeleteUser)
+
 	}
 
 }
