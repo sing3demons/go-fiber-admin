@@ -7,5 +7,11 @@ import (
 )
 
 func Serve(app *fiber.App) {
-	app.Get("", controllers.Register)
+	v1 := app.Group("api/v1/")
+
+	authGroup := v1.Group("auth/")
+	{
+		authGroup.Post("register", controllers.Register)
+		authGroup.Post("login", controllers.Login)
+	}
 }
