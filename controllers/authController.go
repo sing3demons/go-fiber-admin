@@ -3,18 +3,13 @@ package controllers
 import (
 	"github/sing3demons/go-fiber-admin/database"
 	"github/sing3demons/go-fiber-admin/models"
-	"os"
+	"github/sing3demons/go-fiber-admin/util"
 	"strconv"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type Claims struct {
-	jwt.StandardClaims
-}
 
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
@@ -63,12 +58,8 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email or password incorect"})
 	}
 
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(user.ID)),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-	})
+	token, err := util.GenerateJwt(strconv.Itoa(int(user.ID)))
 
-	token, err := claims.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -87,18 +78,11 @@ func Login(c *fiber.Ctx) error {
 
 func User(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
-	token, err := jwt.ParseWithClaims(cookie, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
-	})
 
-	if err != nil || !token.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Unauthenticated"})
-	}
-
-	claims := token.Claims.(*Claims)
+	id, _ := util.ParseJwt(cookie)
 
 	var user models.User
-	database.DB.Where("id = ?", claims.Issuer).First(&user)
+	database.DB.Where("id = ?", id).First(&user)
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
