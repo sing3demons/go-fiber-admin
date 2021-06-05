@@ -15,6 +15,7 @@
 
 .DS_Store
 tmp
+.dbdata
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

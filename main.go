@@ -1,13 +1,26 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github/sing3demons/go-fiber-admin/database"
+	"github/sing3demons/go-fiber-admin/routes"
+	"log"
+	"os"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+)
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	database.Connect()
+
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
+	routes.Serve(app)
 
-	app.Listen(":8080")
+	app.Listen(":" + os.Getenv("PORT"))
 }
