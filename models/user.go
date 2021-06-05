@@ -7,5 +7,5 @@ type User struct {
 	Email     string `gorm:"unique"`
 	FirstName string
 	LastName  string
-	Password  string
+	Password  string `json:"-"`
 }

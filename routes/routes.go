@@ -13,5 +13,8 @@ func Serve(app *fiber.App) {
 	{
 		authGroup.Post("register", controllers.Register)
 		authGroup.Post("login", controllers.Login)
+		authGroup.Get("user", controllers.User)
+		authGroup.Get("logout", controllers.Logout)
 	}
+
 }
