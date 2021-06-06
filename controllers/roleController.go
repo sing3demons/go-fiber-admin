@@ -8,11 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type RoleCreateDTO struct {
-	name        string
-	permissions []string
-}
-
 func AllRoles(c *fiber.Ctx) error {
 	var role []models.Role
 	database.DB.Preload("Permission").Find(&role)
