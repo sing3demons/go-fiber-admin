@@ -23,6 +23,6 @@ func Connect() {
 	}
 
 	database.AutoMigrate(&models.User{}, &models.Role{})
-	// database.Migrator().DropTable(&models.User{})
+	// database.Migrator().DropTable(&models.User{}, &models.Role{})
 	DB = database
 }

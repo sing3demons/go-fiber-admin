@@ -10,7 +10,7 @@ import (
 
 func AllUser(c *fiber.Ctx) error {
 	users := []models.User{}
-	database.DB.Find(&users)
+	database.DB.Preload("Role").Find(&users)
 	return c.JSON(users)
 }
 
@@ -36,7 +36,7 @@ func findUserByID(c *fiber.Ctx) (*models.User, error) {
 	var user models.User
 	user.ID = uint(id)
 
-	if err := database.DB.First(&user).Error; err != nil {
+	if err := database.DB.Preload("Role").First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 	database.DB.Model(&user).Updates(form)
 
-	return c.JSON(user)
+	return c.SendStatus(fiber.StatusNoContent)
 
 }
 

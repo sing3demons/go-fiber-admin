@@ -10,7 +10,8 @@ type User struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Password  string `json:"-"`
-
+	RoleID    uint   `json:"role_id"`
+	Role      Role   `json:"role" gorm:"foreignKey:RoleID"`
 }
 
 func (user *User) EncryptedPassword(password string) {
