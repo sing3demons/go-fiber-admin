@@ -3,6 +3,7 @@ package controllers
 import (
 	"github/sing3demons/go-fiber-admin/database"
 	"github/sing3demons/go-fiber-admin/models"
+	"github/sing3demons/go-fiber-admin/util"
 	"math"
 	"strconv"
 
@@ -19,12 +20,14 @@ func AllUser(c *fiber.Ctx) error {
 	database.DB.Preload("Role").Offset(offset).Limit(limit).Find(&users)
 	database.DB.Model(&models.User{}).Count(&total)
 
+	lastPage := math.Ceil(float64(int(total) / limit))
+
 	return c.JSON(fiber.Map{
 		"data": users,
 		"meta": fiber.Map{
 			"total":     total,
 			"page":      page,
-			"last_page": math.Ceil(float64(int(total) / limit)),
+			"last_page": lastPage,
 		},
 	})
 }
@@ -91,5 +94,51 @@ func DeleteUser(c *fiber.Ctx) error {
 	database.DB.Delete(&user)
 
 	return c.SendStatus(fiber.StatusNoContent)
+}
 
+func UpdateInfo(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	cookie := c.Cookies("jwt")
+	id, _ := util.ParseJwt(cookie)
+	userId, _ := strconv.Atoi(id)
+
+	user := models.User{
+		ID:        uint(userId),
+		FirstName: data["first_name"],
+		LastName:  data["last_name"],
+		Email:     data["email"],
+	}
+
+	database.DB.Model(&user).Updates(user)
+
+	return c.JSON(user)
+}
+
+func UpdatePassword(c *fiber.Ctx) error {
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	if data["password"] != data["password_confirm"] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "password do not match",
+		})
+	}
+
+	cookie := c.Cookies("jwt")
+	id, _ := util.ParseJwt(cookie)
+	userId, _ := strconv.Atoi(id)
+	user := models.User{ID: uint(userId)}
+	user.EncryptedPassword(data["password"])
+
+	database.DB.Model(&user).Updates(user)
+
+	return c.SendStatus(fiber.StatusOK)
 }

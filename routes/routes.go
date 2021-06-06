@@ -21,7 +21,8 @@ func Serve(app *fiber.App) {
 	userGroup := v1.Group("users/")
 	userGroup.Use(middlewares.IsAuthenticated)
 	{
-
+		userGroup.Put("/info", controllers.UpdateInfo)
+		userGroup.Put("/password", controllers.UpdatePassword)
 		userGroup.Get("", controllers.AllUser)
 		userGroup.Get("/:id", controllers.GetUser)
 		userGroup.Post("", controllers.CreateUser)
