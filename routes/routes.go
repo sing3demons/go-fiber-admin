@@ -42,4 +42,8 @@ func Serve(app *fiber.App) {
 
 	}
 
+	permissionGroup := v1.Group("permission/")
+	permissionGroup.Use(middlewares.IsAuthenticated)
+	permissionGroup.Get("", controllers.AllPermissions)
+
 }
