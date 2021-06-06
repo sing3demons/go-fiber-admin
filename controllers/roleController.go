@@ -8,16 +8,38 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type RoleCreateDTO struct {
+	name        string
+	permissions []string
+}
+
 func AllRoles(c *fiber.Ctx) error {
 	var role []models.Role
-	database.DB.Find(&role)
+	database.DB.Preload("Permission").Find(&role)
 	return c.JSON(role)
 }
 
 func CreateRole(c *fiber.Ctx) error {
-	var role models.Role
-	if err := c.BodyParser(&role); err != nil {
+	var roleDto fiber.Map
+
+	if err := c.BodyParser(&roleDto); err != nil {
 		return err
+	}
+	list := roleDto["permissions"].([]interface{})
+
+	permissions := make([]models.Permission, len(list))
+
+	for i, permissionId := range list {
+		id, _ := strconv.Atoi(permissionId.(string))
+
+		permissions[i] = models.Permission{
+			ID: uint(id),
+		}
+	}
+
+	role := models.Role{
+		Name:       roleDto["name"].(string),
+		Permission: permissions,
 	}
 
 	if err := database.DB.Create(&role).Error; err != nil {
@@ -30,18 +52,6 @@ func CreateRole(c *fiber.Ctx) error {
 
 }
 
-func findRoleByID(c *fiber.Ctx) (*models.Role, error) {
-	id, _ := strconv.Atoi(c.Params("id"))
-	var role models.Role
-	role.ID = uint(id)
-
-	if err := database.DB.First(&role).Error; err != nil {
-		return nil, err
-	}
-
-	return &role, nil
-}
-
 func GetRole(c *fiber.Ctx) error {
 	user, err := findRoleByID(c)
 	if err != nil {
@@ -51,16 +61,42 @@ func GetRole(c *fiber.Ctx) error {
 }
 
 func UpdateRole(c *fiber.Ctx) error {
-	role, err := findRoleByID(c)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	var form models.Role
-	if err := c.BodyParser(&form); err != nil {
+	var roleDto fiber.Map
+
+	if err := c.BodyParser(&roleDto); err != nil {
 		return err
 	}
-	database.DB.Model(&role).Updates(form)
+
+	list := roleDto["permissions"].([]interface{})
+
+	permissions := make([]models.Permission, len(list))
+
+	for i, permissionId := range list {
+
+		id, _ := strconv.Atoi(permissionId.(string))
+
+		permissions[i] = models.Permission{
+			ID: uint(id),
+		}
+
+	}
+
+	var result interface{}
+
+	database.DB.Table("role_permissions").Where("role_id", id).Delete(&result)
+
+	role := models.Role{
+		ID:         uint(id),
+		Name:       roleDto["name"].(string),
+		Permission: permissions,
+	}
+
+	database.DB.Model(&role).Updates(role)
 
 	return c.JSON(role)
 
@@ -76,4 +112,16 @@ func DeleteRole(c *fiber.Ctx) error {
 
 	return c.SendStatus(fiber.StatusNoContent)
 
+}
+
+func findRoleByID(c *fiber.Ctx) (*models.Role, error) {
+	id, _ := strconv.Atoi(c.Params("id"))
+	var role models.Role
+	role.ID = uint(id)
+
+	if err := database.DB.First(&role).Error; err != nil {
+		return nil, err
+	}
+
+	return &role, nil
 }
