@@ -22,7 +22,7 @@ func Connect() {
 		panic("Could not connect to the database")
 	}
 
-	database.AutoMigrate(&models.User{})
+	database.AutoMigrate(&models.User{}, &models.Role{})
 	// database.Migrator().DropTable(&models.User{})
 	DB = database
 }

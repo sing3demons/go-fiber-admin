@@ -25,8 +25,20 @@ func Serve(app *fiber.App) {
 		userGroup.Get("", controllers.AllUser)
 		userGroup.Get("/:id", controllers.GetUser)
 		userGroup.Post("", controllers.CreateUser)
-		userGroup.Post("/:id", controllers.UpdateUser)
+		userGroup.Put("/:id", controllers.UpdateUser)
 		userGroup.Delete("/:id", controllers.DeleteUser)
+
+	}
+
+	roleGroup := v1.Group("roles/")
+	roleGroup.Use(middlewares.IsAuthenticated)
+	{
+
+		roleGroup.Get("", controllers.AllRoles)
+		roleGroup.Get("/:id", controllers.GetRole)
+		roleGroup.Post("", controllers.CreateRole)
+		roleGroup.Put("/:id", controllers.UpdateRole)
+		roleGroup.Delete("/:id", controllers.DeleteRole)
 
 	}
 
