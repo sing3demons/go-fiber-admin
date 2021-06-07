@@ -53,6 +53,7 @@ func Serve(app *fiber.App) {
 		productGroup.Get("", controllers.AllProducts)
 		productGroup.Get("/:id", controllers.GetProduct)
 		productGroup.Post("", controllers.CreateProduct)
+		productGroup.Post("/uploads", controllers.UploadImage)
 		productGroup.Put("/:id", controllers.UpdateProduct)
 		productGroup.Delete("/:id", controllers.DeleteProduct)
 

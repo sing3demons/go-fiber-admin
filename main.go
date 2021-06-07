@@ -24,11 +24,11 @@ func main() {
 	app := fiber.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
-  
+
 	app.Use(cors.New(cors.Config{
 		AllowCredentials: true,
 	}))
-
+	app.Static("/api/uploads", "./uploads")
 	routes.Serve(app)
 
 	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
