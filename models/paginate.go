@@ -14,11 +14,13 @@ func Paginate(db *gorm.DB, page int, limit int, entity Entity) fiber.Map {
 
 	total := entity.Count(db)
 
+	lastPage := math.Ceil(float64(total) / float64(limit))
+
 	return fiber.Map{
 		"data": data,
 		"meta": fiber.Map{
 			"page":      page,
-			"last_page": math.Ceil(float64(int(total) / limit)),
+			"last_page": lastPage,
 		},
 	}
 

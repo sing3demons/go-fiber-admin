@@ -59,4 +59,11 @@ func Serve(app *fiber.App) {
 
 	}
 
+	orderGroup := v1.Group("orders/")
+	orderGroup.Use(middlewares.IsAuthenticated)
+	{
+		orderGroup.Get("", controllers.AllOrders)
+		orderGroup.Post("/export", controllers.Export)
+	}
+
 }

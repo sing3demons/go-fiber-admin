@@ -20,7 +20,7 @@ func main() {
 	}
 
 	database.Connect()
-
+	// seeds.Load()
 	app := fiber.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
