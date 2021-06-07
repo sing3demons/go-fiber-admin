@@ -8,6 +8,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 )
 
@@ -20,12 +22,14 @@ func main() {
 	database.Connect()
 
 	app := fiber.New()
-
+	app.Use(recover.New())
+	app.Use(logger.New())
+  
 	app.Use(cors.New(cors.Config{
 		AllowCredentials: true,
 	}))
 
 	routes.Serve(app)
 
-	app.Listen(":" + os.Getenv("PORT"))
+	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
 }

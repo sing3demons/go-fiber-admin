@@ -47,4 +47,15 @@ func Serve(app *fiber.App) {
 	permissionGroup.Use(middlewares.IsAuthenticated)
 	permissionGroup.Get("", controllers.AllPermissions)
 
+	productGroup := v1.Group("products/")
+	productGroup.Use(middlewares.IsAuthenticated)
+	{
+		productGroup.Get("", controllers.AllProducts)
+		productGroup.Get("/:id", controllers.GetProduct)
+		productGroup.Post("", controllers.CreateProduct)
+		productGroup.Put("/:id", controllers.UpdateProduct)
+		productGroup.Delete("/:id", controllers.DeleteProduct)
+
+	}
+
 }
