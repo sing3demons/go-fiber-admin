@@ -64,6 +64,7 @@ func Serve(app *fiber.App) {
 	{
 		orderGroup.Get("", controllers.AllOrders)
 		orderGroup.Post("/export", controllers.Export)
+		orderGroup.Get("/chart", controllers.Chart)
 	}
 
 }

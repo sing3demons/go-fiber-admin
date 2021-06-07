@@ -46,6 +46,7 @@ func Load() {
 
 	log.Info("Creating order...")
 	numOFOrder := 10
+	// orders := make([]models.Order, 0, numOFOrder)
 	for i := 1; i <= numOFOrder; i++ {
 		order := models.Order{
 			Email:     faker.Email(),
@@ -54,6 +55,7 @@ func Load() {
 			Total:     1,
 		}
 		database.DB.Create(&order)
+		// orders = append(orders, order)
 	}
 
 }

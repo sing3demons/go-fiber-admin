@@ -81,7 +81,7 @@ func User(c *fiber.Ctx) error {
 	id, _ := util.ParseJwt(cookie)
 
 	var user models.User
-	database.DB.Where("id = ?", id).First(&user)
+	database.DB.Where("id = ?", id).Preload("Role").First(&user)
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 

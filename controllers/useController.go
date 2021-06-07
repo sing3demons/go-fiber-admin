@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github/sing3demons/go-fiber-admin/database"
+	"github/sing3demons/go-fiber-admin/middlewares"
 	"github/sing3demons/go-fiber-admin/models"
 	"github/sing3demons/go-fiber-admin/util"
 	"strconv"
@@ -10,13 +11,20 @@ import (
 )
 
 func AllUser(c *fiber.Ctx) error {
+	if err := middlewares.IsAuthorized(c, "users"); err != nil {
+		return err
+	}
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "5"))
 
-	return c.JSON(models.Paginate(database.DB, page, limit, &models.User{}))
+	return c.JSON(models.Paginate(database.DB.Preload("Role"), page, limit, &models.User{}))
 }
 
 func CreateUser(c *fiber.Ctx) error {
+	if err := middlewares.IsAuthorized(c, "users"); err != nil {
+		return err
+	}
+
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
 		return err
@@ -46,6 +54,10 @@ func findUserByID(c *fiber.Ctx) (*models.User, error) {
 }
 
 func GetUser(c *fiber.Ctx) error {
+	if err := middlewares.IsAuthorized(c, "users"); err != nil {
+		return err
+	}
+
 	user, err := findUserByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
@@ -54,6 +66,10 @@ func GetUser(c *fiber.Ctx) error {
 }
 
 func UpdateUser(c *fiber.Ctx) error {
+	if err := middlewares.IsAuthorized(c, "users"); err != nil {
+		return err
+	}
+
 	user, err := findUserByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
