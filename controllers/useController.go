@@ -8,7 +8,15 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/copier"
 )
+
+type formCreate struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	RoleID    string `json:"role_id"`
+}
 
 func AllUser(c *fiber.Ctx) error {
 	if err := middlewares.IsAuthorized(c, "users"); err != nil {
@@ -25,12 +33,16 @@ func CreateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	var user models.User
-	if err := c.BodyParser(&user); err != nil {
+	var form formCreate
+	if err := c.BodyParser(&form); err != nil {
 		return err
 	}
+	rId, _ := strconv.Atoi(form.RoleID)
+	var user models.User
 
-	user.EncryptedPassword(user.Password)
+	copier.Copy(&user, &form)
+	user.RoleID = uint(rId)
+	user.EncryptedPassword("12345678")
 	if err := database.DB.Create(&user).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
@@ -66,20 +78,24 @@ func GetUser(c *fiber.Ctx) error {
 }
 
 func UpdateUser(c *fiber.Ctx) error {
-	if err := middlewares.IsAuthorized(c, "users"); err != nil {
-		return err
-	}
 
-	user, err := findUserByID(c)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
-	}
+	id, _ := strconv.Atoi(c.Params("id"))
 
-	var form models.User
+	// user := models.User{
+	// 	ID: uint(id),
+	// }
+	var form formCreate
 	if err := c.BodyParser(&form); err != nil {
 		return err
 	}
-	database.DB.Model(&user).Updates(form)
+	rId, _ := strconv.Atoi(form.RoleID)
+	var user models.User
+
+	copier.Copy(&user, &form)
+	user.ID = uint(id)
+	user.RoleID = uint(rId)
+
+	database.DB.Model(&user).Updates(user)
 
 	return c.SendStatus(fiber.StatusNoContent)
 

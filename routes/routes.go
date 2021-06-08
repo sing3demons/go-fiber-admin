@@ -18,7 +18,7 @@ func Serve(app *fiber.App) {
 		authGroup.Get("/user", controllers.User)
 		authGroup.Get("logout", controllers.Logout)
 	}
-	userGroup := v1.Group("users/")
+	userGroup := v1.Group("users")
 	userGroup.Use(middlewares.IsAuthenticated)
 	{
 		userGroup.Put("/info", controllers.UpdateInfo)
