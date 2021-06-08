@@ -36,7 +36,7 @@ func GetProduct(c *fiber.Ctx) error {
 	product := models.Product{
 		ID: uint(id),
 	}
-	database.DB.Find(&product)
+	database.DB.Preload("Permissions").Find(&product)
 	return c.Status(fiber.StatusOK).JSON(product)
 }
 

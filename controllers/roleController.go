@@ -48,11 +48,17 @@ func CreateRole(c *fiber.Ctx) error {
 }
 
 func GetRole(c *fiber.Ctx) error {
-	user, err := findRoleByID(c)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.Status(fiber.StatusOK).JSON(user)
+	role := models.Role{
+		ID: uint(id),
+	}
+
+	database.DB.Preload("Permission").Find(&role)
+
+	return c.Status(fiber.StatusOK).JSON(role)
 }
 
 func UpdateRole(c *fiber.Ctx) error {
@@ -73,7 +79,8 @@ func UpdateRole(c *fiber.Ctx) error {
 
 	for i, permissionId := range list {
 
-		id, _ := strconv.Atoi(permissionId.(string))
+		// id, _ := strconv.Atoi(permissionId.(string))
+		id, _ := permissionId.(float64)
 
 		permissions[i] = models.Permission{
 			ID: uint(id),
@@ -98,12 +105,19 @@ func UpdateRole(c *fiber.Ctx) error {
 }
 
 func DeleteRole(c *fiber.Ctx) error {
-	role, err := findRoleByID(c)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	database.DB.Delete(&role)
+	role := models.Role{
+		ID: uint(id),
+	}
+
+	if err := database.DB.Delete(&role).Error; err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
+
+	}
 
 	return c.SendStatus(fiber.StatusNoContent)
 
