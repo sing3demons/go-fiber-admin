@@ -18,6 +18,6 @@ func (product *Product) Count(db *gorm.DB) int64 {
 
 func (product *Product) Take(db *gorm.DB, limit int, offset int) interface{} {
 	var products []Product
-	db.Offset(offset).Limit(limit).Find(&products)
+	db.Offset(offset).Limit(limit).Order("id desc").Find(&products)
 	return products
 }

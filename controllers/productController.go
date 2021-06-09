@@ -10,7 +10,7 @@ import (
 
 func AllProducts(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	limit, _ := strconv.Atoi(c.Query("limit", "5"))
+	limit, _ := strconv.Atoi(c.Query("limit", "20"))
 
 	return c.JSON(models.Paginate(database.DB, page, limit, &models.Product{}))
 }
